@@ -9,7 +9,7 @@ import java.util.Date;
 
 @Data
 public class User {
-    @NotBlank
+
     private int id;
     @Email
     private String email;
