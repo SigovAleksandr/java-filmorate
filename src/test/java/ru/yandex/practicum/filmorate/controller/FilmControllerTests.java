@@ -12,10 +12,11 @@ import java.time.LocalDate;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FilmControllerTests {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-    FilmController controller;
+    private FilmController controller;
 
     @BeforeEach
     public void setup() {
@@ -44,11 +45,10 @@ public class FilmControllerTests {
     void updateFilmWithUnknownIdTest() {
         Film film = new Film(0, "test", "description",
                 LocalDate.parse("2000-12-04"), 120);
-        try {
-            controller.updateFilm(film);
-        } catch (ValidationException e) {
-            assertEquals("Movie with id 0 not found", e.getMessage());
-        }
+        ValidationException thrown = assertThrows(ValidationException.class,
+                () -> controller.updateFilm(film)
+        );
+        assertEquals("Movie with id 0 not found", thrown.getMessage());
     }
 
     @Test

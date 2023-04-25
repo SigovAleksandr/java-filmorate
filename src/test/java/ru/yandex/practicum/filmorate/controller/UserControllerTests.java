@@ -12,10 +12,11 @@ import java.time.LocalDate;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UserControllerTests {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-    UserController controller;
+    private UserController controller;
 
     @BeforeEach
     public void setup() {
@@ -44,11 +45,10 @@ public class UserControllerTests {
     void updateUserWithUnknownIdTest() {
         User user = new User(0,"mail.ru", "login",
                 "name of user", LocalDate.parse("1992-12-12"));
-        try {
-            controller.updateUser(user);
-        } catch (ValidationException e) {
-            assertEquals("User with id 0 not found", e.getMessage());
-        }
+        ValidationException thrown = assertThrows(ValidationException.class,
+                () -> controller.updateUser(user)
+        );
+        assertEquals("User with id 0 not found", thrown.getMessage());
     }
 
     @Test

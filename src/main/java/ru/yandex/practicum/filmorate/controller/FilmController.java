@@ -16,9 +16,9 @@ import java.util.List;
 @RequestMapping("/films")
 public class FilmController {
 
-    HashMap<Integer, Film> films = new HashMap<>();
-    int id = 0;
-    LocalDate movieDay = LocalDate.parse("1895-12-28");
+    private final HashMap<Integer, Film> films = new HashMap<>();
+    private int id = 0;
+    private final LocalDate movieDay = LocalDate.parse("1895-12-28");
 
     private int getId() {
         id = id + 1;
@@ -27,8 +27,7 @@ public class FilmController {
 
     @GetMapping()
     public List<Film> getAllFilms() {
-        List<Film> filmsList = new ArrayList<>(films.values());
-        return filmsList;
+        return new ArrayList<>(films.values());
     }
 
     @PostMapping()
