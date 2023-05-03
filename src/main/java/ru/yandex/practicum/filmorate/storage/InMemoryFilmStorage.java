@@ -1,0 +1,55 @@
+package ru.yandex.practicum.filmorate.storage;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+@Slf4j
+@Component
+public class InMemoryFilmStorage implements FilmStorage {
+
+    private final HashMap<Integer, Film> films = new HashMap<>();
+    private int id = 0;
+    private final LocalDate movieDay = LocalDate.parse("1895-12-28");
+
+    private int getId() {
+        id = id + 1;
+        return id;
+    }
+
+    @Override
+    public List<Film> getAllFilms() {
+        return new ArrayList<>(films.values());
+    }
+
+    @Override
+    public Film getFilmById(int id) {
+        return films.get(id);
+    }
+
+    @Override
+    public Film addFilm(Film film) {
+        film.setId(getId());
+        if (film.getReleaseDate().isBefore(movieDay)) {
+            throw new ValidationException("Movie release date is before 1895-12-29");
+        }
+        films.put(film.getId(), film);
+        return film;
+    }
+
+    @Override
+    public Film updateFilm(Film film) {
+        if (films.containsKey(film.getId())) {
+            films.put(film.getId(), film);
+            return film;
+        } else {
+            throw new ValidationException("Movie with id " + film.getId() + " not found");
+        }
+    }
+}
