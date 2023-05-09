@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -38,6 +39,9 @@ public class UserService {
     }
 
     public void addFriend(int userId, int friendId) {
+        if (userStorage.getUserById(userId) == null || userStorage.getUserById(friendId) == null) {
+            throw new ResourceNotFoundException("User not found");
+        }
         User user = userStorage.getUserById(userId);
         User friend = userStorage.getUserById(friendId);
         user.getFriends().add(friendId);

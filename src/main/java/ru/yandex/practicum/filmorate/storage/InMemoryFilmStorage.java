@@ -2,13 +2,12 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -30,15 +29,19 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(int id) {
+        if (!films.containsKey(id)) {
+            throw new ResourceNotFoundException("Film with id " + id + " not found");
+        }
         return films.get(id);
     }
 
     @Override
     public Film addFilm(Film film) {
-        film.setId(getId());
         if (film.getReleaseDate().isBefore(movieDay)) {
             throw new ValidationException("Movie release date is before 1895-12-29");
         }
+        film.setId(getId());
+        film.setLikes(new HashSet<>());
         films.put(film.getId(), film);
         return film;
     }
@@ -46,10 +49,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         if (films.containsKey(film.getId())) {
+            Set<Integer> temp = films.get(film.getId()).getLikes();
+            film.setLikes(temp);
             films.put(film.getId(), film);
             return film;
         } else {
-            throw new ValidationException("Movie with id " + film.getId() + " not found");
+            throw new ResourceNotFoundException("Movie with id " + film.getId() + " not found");
         }
     }
 }

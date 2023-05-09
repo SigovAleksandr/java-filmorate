@@ -3,10 +3,10 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,10 +15,12 @@ import java.util.stream.Collectors;
 public class FilmService {
 
     private final FilmStorage filmStorage;
+    private final UserService userService;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(FilmStorage filmStorage, UserService userService) {
         this.filmStorage = filmStorage;
+        this.userService = userService;
     }
 
     public List<Film> getAllFilms() {
@@ -38,11 +40,17 @@ public class FilmService {
     }
 
     public void addLike(int id, int userId) {
+        if (filmStorage.getFilmById(id) == null || userService.getUserById(userId) == null) {
+            throw new ResourceNotFoundException("Resource not found");
+        }
         Film film = filmStorage.getFilmById(id);
         film.getLikes().add(userId);
     }
 
     public void deleteLike(int id, int userId) {
+        if (filmStorage.getFilmById(id) == null || userService.getUserById(userId) == null) {
+            throw new ResourceNotFoundException("Resource not found");
+        }
         Film film = filmStorage.getFilmById(id);
         film.getLikes().remove(userId);
     }
