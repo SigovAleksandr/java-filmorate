@@ -106,7 +106,7 @@ public class FilmControllerTests {
     }
 
     @Test
-    void addLikeTest() {
+    void addLikeShouldAddLikeToFilmTest() {
         Film film1 = new Film(0, "test", "description",
                 LocalDate.parse("2000-12-04"), 120, null);
         User user1 = new User(0,"fff@mail.ru", "login22",
@@ -118,7 +118,7 @@ public class FilmControllerTests {
     }
 
     @Test
-    void deleteLikeTest() {
+    void deleteLikeShouldDeleteLikeFromFilmTest() {
         Film film1 = new Film(0, "test", "description",
                 LocalDate.parse("2000-12-04"), 120, null);
         User user1 = new User(0,"fff@mail.ru", "login22",

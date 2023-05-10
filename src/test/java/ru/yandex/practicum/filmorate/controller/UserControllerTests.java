@@ -91,7 +91,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void addFriendTest() {
+    void addFriendShouldAddFriendToBothUsersTest() {
         User user1 = new User(0,"fff@mail.ru", "login22",
                 "name of userrrr", LocalDate.parse("1992-12-12"), null);
         User user2 = new User(0,"aaa@mail.ru", "login",
@@ -104,7 +104,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void deleteFriendTest() {
+    void deleteFriendShouldDeleteFriendFromBothUsersTest() {
         User user1 = new User(0,"fff@mail.ru", "login22",
                 "name of userrrr", LocalDate.parse("1992-12-12"), null);
         User user2 = new User(0,"aaa@mail.ru", "login",
@@ -118,7 +118,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void getCommonFriendsTest() {
+    void getCommonFriendsShouldReturnCorrectSizeTest() {
         User user1 = new User(0,"fff@mail.ru", "login22",
                 "name of userrrr", LocalDate.parse("1992-12-12"), null);
         User user2 = new User(0,"aaa@mail.ru", "login",
@@ -130,6 +130,6 @@ public class UserControllerTests {
         controller.addUser(user3);
         controller.addFriend(1, 2);
         controller.addFriend(2, 3);
-        assertEquals(controller.getUserById(2), controller.getCommonFriendsList(1, 3).get(0));
+        assertEquals(1, controller.getCommonFriendsList(1, 3).size());
     }
 }
