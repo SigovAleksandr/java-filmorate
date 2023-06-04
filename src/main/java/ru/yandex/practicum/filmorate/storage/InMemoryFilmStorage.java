@@ -7,7 +7,9 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -41,7 +43,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new ValidationException("Movie release date is before 1895-12-29");
         }
         film.setId(getId());
-        film.setLikes(new HashSet<>());
+        film.setLikes(new ArrayList<>());
         films.put(film.getId(), film);
         return film;
     }
@@ -49,12 +51,22 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         if (films.containsKey(film.getId())) {
-            Set<Integer> temp = films.get(film.getId()).getLikes();
+            List<Integer> temp = films.get(film.getId()).getLikes();
             film.setLikes(temp);
             films.put(film.getId(), film);
             return film;
         } else {
             throw new ResourceNotFoundException("Movie with id " + film.getId() + " not found");
         }
+    }
+
+    @Override
+    public void addLike(int filmId, int userId) {
+
+    }
+
+    @Override
+    public void deleteLike(int filmId, int userId) {
+
     }
 }

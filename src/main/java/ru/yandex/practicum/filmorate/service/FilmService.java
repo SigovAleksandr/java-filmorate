@@ -43,16 +43,14 @@ public class FilmService {
         if (filmStorage.getFilmById(id) == null || userService.getUserById(userId) == null) {
             throw new ResourceNotFoundException("Resource not found");
         }
-        Film film = filmStorage.getFilmById(id);
-        film.getLikes().add(userId);
+        filmStorage.addLike(id, userId);
     }
 
     public void deleteLike(int id, int userId) {
         if (filmStorage.getFilmById(id) == null || userService.getUserById(userId) == null) {
             throw new ResourceNotFoundException("Resource not found");
         }
-        Film film = filmStorage.getFilmById(id);
-        film.getLikes().remove(userId);
+        filmStorage.deleteLike(id, userId);
     }
 
     public List<Film> getMostPopularFilms(int count) {
