@@ -9,5 +9,6 @@ import java.util.List;
 public interface MPAStorage {
 
     List<MPA> getAllMPA();
+
     MPA getMPAById(int id);
 }
