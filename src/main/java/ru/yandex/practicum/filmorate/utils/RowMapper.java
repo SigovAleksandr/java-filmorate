@@ -8,6 +8,10 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @UtilityClass
 public class RowMapper {
@@ -47,4 +51,38 @@ public class RowMapper {
     public static int mapRowToLikes(ResultSet rs, int rowNum) throws SQLException {
         return rs.getInt("USER_ID");
     }
+
+    public static Film mapRowToFullFilm(ResultSet rs, int row) throws SQLException {
+        Film film = new Film();
+        film.setId(rs.getInt("FILM_ID"));
+        film.setName(rs.getString("FILM_NAME"));
+        film.setDescription(rs.getString("DESCRIPTION"));
+        film.setReleaseDate(rs.getObject("RELEASE_DATE", LocalDate.class));
+        film.setDuration(rs.getInt("DURATION"));
+        film.setMpa(new MPA(rs.getInt("MPA_ID"),
+                rs.getString("MPA_NAME")));
+        film.setGenres(mapGenres(rs));
+        return film;
+    }
+
+    public static List<Genre> mapGenres(ResultSet rs) throws SQLException {
+        List<Genre> genres = new ArrayList<>();
+        do {
+            if (rs.getInt("GENRE_ID") != 0) {
+                genres.add(new Genre(rs.getInt("GENRE_ID"),
+                        rs.getString("GENRE_NAME")));
+            }
+        } while (rs.next());
+        return genres;
+    }
+
+    private List<Integer> mapLikes(ResultSet rs) throws SQLException {
+        List<Integer> likes = new ArrayList<>();
+        do {
+            likes.add(rs.getInt("USER_ID"));
+        } while (rs.next());
+        return likes;
+    }
+
+
 }

@@ -23,7 +23,7 @@ public class GenreService {
         return genreStorage.getAllGenres();
     }
 
-    public Genre getGenreById(@PathVariable("id")int id) {
+    public Genre getGenreById(int id) {
         return genreStorage.getGenreById(id);
     }
 }

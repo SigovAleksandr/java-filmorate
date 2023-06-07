@@ -69,4 +69,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     public void deleteLike(int filmId, int userId) {
 
     }
+
+    @Override
+    public List<Film> getMostPopularFilms(int count) {
+        return null;
+    }
 }

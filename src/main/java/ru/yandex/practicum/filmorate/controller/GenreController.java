@@ -15,7 +15,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/genres")
 public class GenreController {
-    GenreService genreService;
+    private final GenreService genreService;
 
     @Autowired
     public GenreController(GenreService genreService) {

@@ -4,9 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,7 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserService userService;
+    private final LocalDate movieDay = LocalDate.parse("1895-12-28");
 
     @Autowired
     public FilmService(FilmStorage filmStorage, UserService userService) {
@@ -32,6 +35,9 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
+        if (film.getReleaseDate().isBefore(movieDay)) {
+            throw new ValidationException("Movie release date is before 1895-12-29");
+        }
         return filmStorage.addFilm(film);
     }
 
@@ -55,9 +61,10 @@ public class FilmService {
 
     public List<Film> getMostPopularFilms(int count) {
         List<Film> films = filmStorage.getAllFilms();
-        return films.stream()
-                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
-                .limit(count)
-                .collect(Collectors.toList());
+//        return films.stream()
+//                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+//                .limit(count)
+//                .collect(Collectors.toList());
+        return filmStorage.getMostPopularFilms(count);
     }
 }

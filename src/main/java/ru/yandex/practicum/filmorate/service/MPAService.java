@@ -23,7 +23,7 @@ public class MPAService {
         return mpaStorage.getAllMPA();
     }
 
-    public MPA getMpaById(@PathVariable("id")int id) {
+    public MPA getMpaById(int id) {
         return mpaStorage.getMPAById(id);
     }
 }
