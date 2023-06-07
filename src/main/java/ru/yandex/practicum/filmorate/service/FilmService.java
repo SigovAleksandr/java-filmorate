@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -60,11 +59,6 @@ public class FilmService {
     }
 
     public List<Film> getMostPopularFilms(int count) {
-        List<Film> films = filmStorage.getAllFilms();
-//        return films.stream()
-//                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
-//                .limit(count)
-//                .collect(Collectors.toList());
         return filmStorage.getMostPopularFilms(count);
     }
 }

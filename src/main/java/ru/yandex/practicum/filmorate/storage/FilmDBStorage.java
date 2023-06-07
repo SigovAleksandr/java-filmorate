@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -16,8 +15,9 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.utils.RowMapper;
 
-import java.sql.*;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -47,16 +47,20 @@ public class FilmDBStorage implements FilmStorage {
                 "M.MPA_ID,\n" +
                 "M.MPA_NAME,\n" +
                 "GL.GENRE_ID,\n" +
-                "GL.GENRE_NAME,\n" +
+                "GL.GENRE_NAME\n" +
                 "FROM FILMS F\n" +
                 "LEFT JOIN MPA_RATING M ON F.RATING = M.MPA_ID\n" +
                 "LEFT JOIN FILM_GENRES FG on F.FILM_ID = FG.FILM_ID\n" +
                 "LEFT JOIN GENRES_LIST GL on FG.GENRE_ID = GL.GENRE_ID\n";
-        List<Film> films = new ArrayList<>();
-        jdbcTemplate.query(query, new ResultSetExtractor<List<Film>>() {
-            @Override
-            public List<Film> extractData(ResultSet rs) throws SQLException, DataAccessException {
-                while (rs.next()) {
+        return jdbcTemplate.query(query, (ResultSetExtractor<List<Film>>) rs -> {
+            Map<Integer, Film> filmMap = new HashMap<>();
+            while (rs.next()) {
+                int filmId = rs.getInt("FILM_ID");
+                if (filmMap.containsKey(filmId)) {
+                    Film film = filmMap.get(filmId);
+                    film.getGenres().add(new Genre(rs.getInt("GENRE_ID"),
+                            rs.getString("GENRE_NAME")));
+                } else {
                     Film film = new Film();
                     film.setId(rs.getInt("FILM_ID"));
                     film.setName(rs.getString("FILM_NAME"));
@@ -65,13 +69,17 @@ public class FilmDBStorage implements FilmStorage {
                     film.setDuration(rs.getInt("DURATION"));
                     film.setMpa(new MPA(rs.getInt("MPA_ID"),
                             rs.getString("MPA_NAME")));
-                    film.setGenres(RowMapper.mapGenres(rs));
-                    films.add(film);
+                    List<Genre> genres = new ArrayList<>();
+                    if (rs.getInt("GENRE_ID") != 0) {
+                        genres.add(new Genre(rs.getInt("GENRE_ID"),
+                                rs.getString("GENRE_NAME")));
+                    }
+                    film.setGenres(genres);
+                    filmMap.put(filmId, film);
                 }
-                return films;
             }
+            return new ArrayList<>(filmMap.values());
         });
-        return films;
     }
 
     @Override
@@ -92,8 +100,6 @@ public class FilmDBStorage implements FilmStorage {
                 "LEFT JOIN GENRES_LIST GL on FG.GENRE_ID = GL.GENRE_ID\n" +
                 "WHERE F.FILM_ID = ?";
         List<Film> films = jdbcTemplate.query(query, RowMapper::mapRowToFullFilm, id);
-
-
         if (films.isEmpty()) {
             throw new ResourceNotFoundException("Film not found");
         }
@@ -116,7 +122,6 @@ public class FilmDBStorage implements FilmStorage {
             return stmt;
         }, keyHolder);
         film.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
-//        film.setMpa(mpaStorage.getMPAById(film.getMpa().getId()));
         if (film.getGenres() == null) {
             film.setGenres(new ArrayList<>());
         } else {
@@ -152,7 +157,6 @@ public class FilmDBStorage implements FilmStorage {
                 }
             });
         }
-//        film.setGenres(getGenresForFilm(film.getId()));
         return film;
     }
 
@@ -240,26 +244,37 @@ public class FilmDBStorage implements FilmStorage {
                 "LEFT JOIN FILM_GENRES FG on F.FILM_ID = FG.FILM_ID\n" +
                 "LEFT JOIN GENRES_LIST GL on FG.GENRE_ID = GL.GENRE_ID\n" +
                 "LEFT JOIN FILM_LIKES FL on F.FILM_ID = FL.FILM_ID\n" +
-                "GROUP BY F.FILM_ID\n" +
+                "GROUP BY F.FILM_ID, GL.GENRE_ID\n" +
                 "ORDER BY COUNT(FL.USER_ID) DESC\n" +
                 "LIMIT ?";
-        List<Film> films = jdbcTemplate.query(query, RowMapper::mapRowToFullFilm, count);
-        return films;
-    }
-
-
-    private MPA getMPAForFilm(int id) {
-        String query = "SELECT * FROM MPA_RATING M\n" +
-                "JOIN FILMS F ON M.MPA_ID = F.RATING\n" +
-                "WHERE F.FILM_ID = ?";
-        return jdbcTemplate.queryForObject(query, RowMapper::mapRowToMPA, id);
-    }
-
-    private List<Genre> getGenresForFilm(int id) {
-        String query = "SELECT * FROM GENRES_LIST G\n" +
-                "JOIN FILM_GENRES F ON G.GENRE_ID = F.GENRE_ID\n" +
-                "WHERE F.FILM_ID = ?";
-        return jdbcTemplate.query(query, RowMapper::mapRowToGenre, id);
+        return jdbcTemplate.query(query, (ResultSetExtractor<List<Film>>) rs -> {
+            Map<Integer, Film> filmMap = new HashMap<>();
+            while (rs.next()) {
+                int filmId = rs.getInt("FILM_ID");
+                if (filmMap.containsKey(filmId)) {
+                    Film film = filmMap.get(filmId);
+                    film.getGenres().add(new Genre(rs.getInt("GENRE_ID"),
+                            rs.getString("GENRE_NAME")));
+                } else {
+                    Film film = new Film();
+                    film.setId(rs.getInt("FILM_ID"));
+                    film.setName(rs.getString("FILM_NAME"));
+                    film.setDescription(rs.getString("DESCRIPTION"));
+                    film.setReleaseDate(rs.getObject("RELEASE_DATE", LocalDate.class));
+                    film.setDuration(rs.getInt("DURATION"));
+                    film.setMpa(new MPA(rs.getInt("MPA_ID"),
+                            rs.getString("MPA_NAME")));
+                    List<Genre> genres = new ArrayList<>();
+                    if (rs.getInt("GENRE_ID") != 0) {
+                        genres.add(new Genre(rs.getInt("GENRE_ID"),
+                                rs.getString("GENRE_NAME")));
+                    }
+                    film.setGenres(genres);
+                    filmMap.put(filmId, film);
+                }
+            }
+            return new ArrayList<>(filmMap.values());
+        }, count);
     }
 
     private List<Integer> getLikesForFilm(int id) {

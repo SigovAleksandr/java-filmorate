@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @UtilityClass
@@ -75,14 +74,4 @@ public class RowMapper {
         } while (rs.next());
         return genres;
     }
-
-    private List<Integer> mapLikes(ResultSet rs) throws SQLException {
-        List<Integer> likes = new ArrayList<>();
-        do {
-            likes.add(rs.getInt("USER_ID"));
-        } while (rs.next());
-        return likes;
-    }
-
-
 }

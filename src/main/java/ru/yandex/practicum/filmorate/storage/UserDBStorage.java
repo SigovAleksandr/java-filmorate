@@ -37,14 +37,13 @@ public class UserDBStorage implements UserStorage {
     @Override
     public User getUserById(int id) {
         String query = "SELECT * FROM USERS WHERE USER_ID = ?";
-        SqlRowSet rows = jdbcTemplate.queryForRowSet(query, id);
-        if (!rows.next()) {
-            throw new ResourceNotFoundException("User not found");
+        List<User> users = jdbcTemplate.query(query, RowMapper::mapRowToUser, id);
+        if (users.isEmpty()) {
+            throw new ResourceNotFoundException("Film not found");
         }
-        User user = jdbcTemplate.queryForObject(query, RowMapper::mapRowToUser, id);
         List<Integer> friends = getFriendsList(id);
-        user.setFriends(friends);
-        return user;
+        users.get(0).setFriends(friends);
+        return users.get(0);
     }
 
     @Override
