@@ -5,7 +5,9 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -35,7 +37,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User addUser(User user) {
         user.setId(getId());
-        user.setFriends(new HashSet<>());
+        user.setFriends(new ArrayList<>());
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
@@ -46,12 +48,22 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
         if (users.containsKey(user.getId())) {
-            Set<Integer> temp = users.get(user.getId()).getFriends();
+            List<Integer> temp = users.get(user.getId()).getFriends();
             user.setFriends(temp);
             users.put(user.getId(), user);
             return user;
         } else {
             throw new ResourceNotFoundException("User with id " + user.getId() + " not found");
         }
+    }
+
+    @Override
+    public void addFriend(int userId, int friendId) {
+
+    }
+
+    @Override
+    public void deleteFriend(int userId, int friendId) {
+
     }
 }
